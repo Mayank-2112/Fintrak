@@ -37,7 +37,7 @@ app.use('/server/client',clientRoutes);
 app.use('/server/purchase',purchaseRoutes);
 app.use('/server/sale',saleRoutes);
 app.use('/server/user',userRoutes);
-app.use('/server/dept', deptRoutes);
+app.use('/server/department', deptRoutes);
 app.use('/server/member', memberRoutes);
 
 // app.use(express.static(path.join(__dirname,'/client/dist')));

@@ -9,7 +9,6 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import Typography from '@mui/material/Typography';
 import CombinedChart from './CombinedChart';
-import CombinedChartTest from './CombinedChartTest';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {
@@ -23,7 +22,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 export default function PredictionsDialog({ open, handleClose }) {
     const [show, setShow] = React.useState(false);
     const handleClick =()=>{
-        setShow(true);
+        setShow(show => !show);
     };
     return (
         <React.Fragment>
@@ -59,7 +58,7 @@ export default function PredictionsDialog({ open, handleClose }) {
                 </DialogContent>
                 <DialogActions>
                     <Button autoFocus onClick={handleClick} color='primary' variant='contained'>
-                        Show Predictions
+                        {show ? 'Remove ' : 'Show '}Predictions
                     </Button>
                 </DialogActions>
             </BootstrapDialog>

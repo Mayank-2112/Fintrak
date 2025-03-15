@@ -16,15 +16,28 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { Button, Stack } from '@mui/material';
 import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined';
 import { CustomDialog } from './CustomDialog';
+import { CustomDialogAction } from './CustomDialogAction';
 
 
 
 
-function DepartmentRow({ department, setData, editData }) {
+function DepartmentRow({ department, setData, setMembers, editData }) {
   const [open, setOpen] = React.useState(false);
   const [openDialog, setOpenDialog] = React.useState(false);
-  const [members, setMembers] = React.useState([]);
-  const [editMember, setEditMember] = React.useState(null);
+  const [openActionDialog, setOpenActionDialog] = React.useState(false);
+  const [actionType, setActionType] = React.useState('');
+  const [selectedRow, setSelectedRow] = React.useState(null);
+
+  const handleOpenActionDialog = (type, rowData) => {
+    setActionType(type);
+    setSelectedRow(rowData);
+    setOpenActionDialog(true);
+  };
+  
+  const handleCloseActionDialog = () => {
+    setOpenActionDialog(false);
+  };
+
 
   const handleClickOpen = () => {
     setOpenDialog(true);
@@ -47,10 +60,10 @@ function DepartmentRow({ department, setData, editData }) {
         <TableCell align='center'>{department.deptHead}</TableCell>
         <TableCell align="center">{department.noOfMembers}</TableCell>
         <TableCell align="center">
-          <Button color={'success'} variant='contained'>Edit</Button>
+          <Button color={'success'} variant='contained' onClick={() => handleOpenActionDialog('Edit', department)}>Edit</Button>
         </TableCell>
         <TableCell align='center'>
-          <Button type="submit" variant='contained' color='error'>Delete</Button>
+          <Button type="submit" variant='contained' color='error' onClick={() => handleOpenActionDialog('Delete', department)}>Delete</Button>
         </TableCell>
       </TableRow>
       <TableRow style={{ backgroundColor: 'black' }}>
@@ -88,10 +101,10 @@ function DepartmentRow({ department, setData, editData }) {
                       <TableCell align='center'>{member.memEmail}</TableCell>
                       <TableCell align='center'>{member.memRole}</TableCell>
                       <TableCell align="center">
-                        <Button color={'success'} variant='contained'>Edit</Button>
+                        <Button color={'success'} variant='contained' onClick={() => handleOpenActionDialog('Edit', member)}>Edit</Button>
                       </TableCell>
                       <TableCell align='center'>
-                        <Button type="submit" variant='contained' color='error'>Delete</Button>
+                        <Button type="submit" variant='contained' color='error' onClick={() => handleOpenActionDialog('Delete', member)}>Delete</Button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -101,6 +114,15 @@ function DepartmentRow({ department, setData, editData }) {
           </Collapse>
         </TableCell>
       </TableRow>
+      <CustomDialogAction
+  open={openActionDialog}
+  handleClose={handleCloseActionDialog}
+  category={selectedRow?.memId ? 'member' : 'department'}
+  actionType={actionType}
+  editRow={selectedRow}
+  setData={selectedRow?.memId ? setMembers : setData} // Ensure correct state update
+/>
+
     </>
   );
 }
@@ -125,29 +147,33 @@ DepartmentRow.propTypes = {
 
 
 
-export default function CollapsibleTable({ departmentsData, setData, editData }) {
-
+export default function CollapsibleTable({ departmentsData, setData, setMembers, editData }) {
+  
   return (
+    <>
 
-    <TableContainer component={Paper}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell />
-            <TableCell align='center'>Department ID</TableCell>
-            <TableCell align='center'>Department Name</TableCell>
-            <TableCell align='center'>Department Head</TableCell>
-            <TableCell align="center">No. of Members</TableCell>
-            <TableCell align="center">Edit</TableCell>
-            <TableCell align="center">Delete</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {departmentsData.map((dept) => (
-            <DepartmentRow key={dept.deptId} department={dept} setData={setData} editData={editData} />
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell />
+              <TableCell align='center'>Department ID</TableCell>
+              <TableCell align='center'>Department Name</TableCell>
+              <TableCell align='center'>Department Head</TableCell>
+              <TableCell align="center">No. of Members</TableCell>
+              <TableCell align="center">Edit</TableCell>
+              <TableCell align="center">Delete</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {departmentsData.map((dept) => (
+              <DepartmentRow key={dept.deptId} department={dept} setData={setData} setMembers={setMembers} editData={editData} />
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      
+
+    </>
   );
 }

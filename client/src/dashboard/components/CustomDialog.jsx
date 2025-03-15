@@ -151,7 +151,7 @@ export const CustomDialog = ({ open, handleClose, category, setData, editData })
                     <DialogContent>
                         <DialogContentText>Add new {value} details carefully. And all fields are required.</DialogContentText>
                         <Stack sx={{ width: '100%', mt: 3 }} spacing={2}>
-                            <TextField autoFocus required margin="dense" id="deptId" name="deptId" label="Department ID" type="number" variant="filled" onChange={handleChange} />
+                            <TextField autoFocus required margin="dense" id="deptId" name="deptId" label="Department ID" type="text" variant="filled" onChange={handleChange} />
                             <TextField autoFocus required margin="dense" id="deptName" name="deptName" label="Department Name" type="text" variant="filled" onChange={handleChange} />
                             <TextField autoFocus required margin="dense" id="deptHead" name="deptHead" label="Department Head" type="text" variant="filled" onChange={handleChange} />
                         </Stack>

@@ -86,7 +86,6 @@ export const CustomDialogAction = ({ open, handleClose, category, editRow, actio
                             <DialogContentText>
                                 {actionType} details carefully. And all fields are required.
                             </DialogContentText>
-                            {actionType === 'Edit' && (
                                 <Stack sx={{ width: '100%', mt: 3 }} spacing={2}>
                                 <TextField autoFocus required margin="dense" id="id" name="productId" label="Product Id" type="number" variant="filled" onChange={handleChange} value={formData.id} />
                                 <TextField autoFocus required margin="dense" id="name" name="productName" label="Product Name" type="text" variant="filled" onChange={handleChange} value={formData.name}/>
@@ -105,7 +104,6 @@ export const CustomDialogAction = ({ open, handleClose, category, editRow, actio
                                     <FormControlLabel value="completed" control={<Radio />} label="Completed" />
                                 </RadioGroup>
                             </Stack>
-                            )}
                         </DialogContent>
                     </>
                 )}
@@ -116,7 +114,6 @@ export const CustomDialogAction = ({ open, handleClose, category, editRow, actio
                             <DialogContentText>
                                 {actionType} details carefully. And all fields are required.
                             </DialogContentText>
-                            {actionType === 'Edit' && (
                                 <Stack sx={{ width: '100%', mt: 3 }} spacing={2}>
                                     <TextField autoFocus required margin="dense" id="id" name="clientId" label="Client Id" type="number" variant="filled" onChange={handleChange} value={formData.id} />
                                     <TextField autoFocus required margin="dense" id="name" name="clientName" label="Client Name" type="text" variant="filled" onChange={handleChange} value={formData.name} />
@@ -133,18 +130,16 @@ export const CustomDialogAction = ({ open, handleClose, category, editRow, actio
                                         <FormControlLabel value="inactive" control={<Radio />} label="Inactive" />
                                     </RadioGroup>
                                 </Stack>
-                            )}
                         </DialogContent>
                     </>
                 )}
                 {(actionType === 'Edit' && value === 'purchase') && (
                     <>
-                    <DialogTitle>{value} Details</DialogTitle>
+                    <DialogTitle>{actionType} Details</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            {value} details carefully. And all fields are required.
+                            {actionType} details carefully. And all fields are required.
                         </DialogContentText>
-                        {value === 'purchase' && (
                             <Stack sx={{ width: '100%', mt: 3 }} spacing={2}>
                                 <TextField autoFocus required margin="dense" id="id" name="purchaseId" label="Purchase Id" type="number" variant="filled" onChange={handleChange} value={formData.id} />
                                 <TextField autoFocus required margin="dense" id="purchaseItem" name="purchaseItem" label="Purchase Item" type="text" variant="filled" onChange={handleChange} value={formData.purchaseItem} />
@@ -153,18 +148,16 @@ export const CustomDialogAction = ({ open, handleClose, category, editRow, actio
                                 <TextField autoFocus required margin="dense" id="amount" name="amount" label="Amount" type="number" variant="filled" onChange={handleChange} value={formData.amount} />
                                 <TextField autoFocus required margin="dense" id="category" name="category" label="Category" type="text" variant="filled" onChange={handleChange} value={formData.category} />
                             </Stack>
-                        )}
                     </DialogContent>
                 </>
                 )}
                 {(actionType === 'Edit' && value === 'sale') && (
                     <>
-                    <DialogTitle>{value} Details</DialogTitle>
+                    <DialogTitle>{actionType} Details</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            {value} details carefully. And all fields are required.
+                            {actionType} details carefully. And all fields are required.
                         </DialogContentText>
-                        {value === 'sale' && (
                             <Stack sx={{ width: '100%', mt: 3 }} spacing={2}>
                                 <TextField autoFocus required margin="dense" id="id" name="purchaseId" label="Sale Id" type="number" variant="filled" onChange={handleChange} value={formData.id} />
                                 <TextField autoFocus required margin="dense" id="productName" name="productName" label="Product Name" type="text" variant="filled" onChange={handleChange} value={formData.productName} />
@@ -172,13 +165,40 @@ export const CustomDialogAction = ({ open, handleClose, category, editRow, actio
                                 <TextField autoFocus required margin="dense" id="saleDate" name="saleDate" label="Sale Date" type="date" variant="filled" onChange={handleChange} value={formData.saleDate} />
                                 <TextField autoFocus required margin="dense" id="amount" name="amount" label="Amount" type="number" variant="filled" onChange={handleChange} value={formData.amount} />
                             </Stack>
-                        )}
+                    </DialogContent>
+                </>
+                )}
+                {(actionType === 'Edit' && value === 'department') && (
+                    <>
+                    <DialogTitle>{actionType} Details</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>{actionType} details carefully. And all fields are required.</DialogContentText>
+                        <Stack sx={{ width: '100%', mt: 3 }} spacing={2}>
+                            <TextField autoFocus required margin="dense" id="deptId" name="deptId" label="Department ID" type="text" variant="filled" onChange={handleChange} value={formData.deptId} />
+                            <TextField autoFocus required margin="dense" id="deptName" name="deptName" label="Department Name" type="text" variant="filled" onChange={handleChange} value={formData.deptName} />
+                            <TextField autoFocus required margin="dense" id="deptHead" name="deptHead" label="Department Head" type="text" variant="filled" onChange={handleChange} value={formData.deptHead} />
+                        </Stack>
+                    </DialogContent>
+                </>
+                )}
+                {(actionType === 'Edit' && value === 'member') && (
+                    <>
+                    <DialogTitle>{actionType} Details</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>{actionType} details carefully. And all fields are required.</DialogContentText>
+                        <Stack sx={{ width: '100%', mt: 3 }} spacing={2}>
+                            <TextField autoFocus required margin="dense" id="memId" name="memId" label="Member ID" type="number" variant="filled" onChange={handleChange} value={formData.memId}  />
+                            <TextField required margin="dense" id="memName" name="memName" label="Member Name" type="text" variant="filled" onChange={handleChange} value={formData.memName} />
+                            <TextField required margin="dense" id="memEmail" name="memEmail" label="Member Email" type="email" variant="filled" onChange={handleChange} value={formData.memEmail} />
+                            <TextField required margin="dense" id="memRole" name="memRole" label="Member Role" type="text" variant="filled" onChange={handleChange} value={formData.memRole} />
+                            <TextField required margin="dense" id="deptId" name="deptId" label="Department Id" type="text" variant="filled" onChange={handleChange} value={formData.deptId} />
+                        </Stack>
                     </DialogContent>
                 </>
                 )}
                 {actionType === 'Delete' && (
                     <>
-                        <DialogTitle>{value} Details</DialogTitle>
+                        <DialogTitle>{actionType} Details</DialogTitle>
                         <DialogContent>
                             <DialogContentText>
                                 Are you sure you want to delete this {value} details?

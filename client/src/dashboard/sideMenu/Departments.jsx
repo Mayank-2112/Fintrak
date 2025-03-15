@@ -23,7 +23,7 @@ export const Departments = () => {
     React.useEffect(() => {
         const fetchDepartments = async () => {
             try {
-                const res = await fetch(`${import.meta.env.VITE_PORT}/server/dept/getall`);
+                const res = await fetch(`${import.meta.env.VITE_PORT}/server/department/getall`);
                 const data = await res.json();
 
                 if (res.ok) {
@@ -54,8 +54,10 @@ export const Departments = () => {
 
 
     }, []);
-
+    
+    
     const formattedData = departments.map((dept) => ({
+        _id: dept._id,
         deptId: dept.deptId,
         deptName: dept.deptName,
         deptHead: dept.deptHead,
@@ -63,6 +65,7 @@ export const Departments = () => {
         members: members
             .filter((mem) => mem.deptId === dept.deptId)
             .map((mem) => ({
+                _id: mem._id,
                 memId: mem.memId,
                 memName: mem.memName,
                 memEmail: mem.memEmail,
@@ -88,7 +91,7 @@ export const Departments = () => {
                     <CustomDialog open={open} handleClose={handleClose} category={'department'} setData={setDepartments} editData={editDepartment} />
                 </Stack>
             </Box>
-            <CollapsibleTable departmentsData={formattedData} setData={setMembers} editData={editMembers}/>
+            <CollapsibleTable departmentsData={formattedData} setData={setDepartments} setMembers={setMembers} editData={editMembers}/>
         </Box>
     )
 }
