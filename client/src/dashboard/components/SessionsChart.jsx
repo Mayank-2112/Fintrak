@@ -1,9 +1,7 @@
 import * as React from 'react';
-import PropTypes from 'prop-types';
 import { useTheme } from '@mui/material/styles';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import Chip from '@mui/material/Chip';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import { LineChart } from '@mui/x-charts/LineChart';
@@ -19,35 +17,67 @@ function AreaGradient({ color, id }) {
   );
 }
 
-AreaGradient.propTypes = {
-  color: PropTypes.string.isRequired,
-  id: PropTypes.string.isRequired,
-};
-
-function getDaysInMonth(month, year) {
-  const date = new Date(year, month, 0);
-  const monthName = date.toLocaleDateString('en-US', {
-    month: 'short',
-  });
-  const daysInMonth = date.getDate();
-  const days = [];
-  let i = 1;
-  while (days.length < daysInMonth) {
-    days.push(`${monthName} ${i}`);
-    i += 1;
-  }
-  return days;
-}
-
 export default function SessionsChart() {
   const theme = useTheme();
-  const data = getDaysInMonth(3, 2025);
 
-  const colorPalette = [
-    theme.palette.primary.light,
-    theme.palette.primary.main,
-    theme.palette.primary.dark,
-  ];
+  const [purchases, setPurchases] = React.useState([]);
+  const [sales, setSales] = React.useState([]);
+  const [monthlySales, setMonthlySales] = React.useState([]);
+  const [monthlyPurchases, setMonthlyPurchases] = React.useState([]);
+
+  React.useEffect(() => {
+    const fetchPurchases = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_PORT}/server/purchase/getall`);
+        const data = await res.json();
+        if (res.ok) setPurchases(data.purchases);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    const fetchSales = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_PORT}/server/sale/getall`);
+        const data = await res.json();
+        if (res.ok) setSales(data.sales);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchPurchases();
+    fetchSales();
+  }, []);
+
+  React.useEffect(() => {
+    function getMonthlyData(data, dateKey) {
+      const monthlyData = {};
+      data.forEach(({ amount, [dateKey]: date }) => {
+        if (!date) return;
+        const month = new Date(date).toISOString().slice(0, 7);
+        monthlyData[month] = (monthlyData[month] || 0) + amount;
+      });
+
+      return Object.entries(monthlyData).map(([month, total]) => ({ month, total }));
+    }
+
+    setMonthlySales(getMonthlyData(sales, 'saleDate'));
+    setMonthlyPurchases(getMonthlyData(purchases, 'purchaseDate'));
+  }, [sales, purchases]);
+
+  const sortedMonths = [...new Set([...monthlySales, ...monthlyPurchases].map(d => d.month))].sort();
+
+  const revenueData = sortedMonths.map(month => {
+    const found = monthlySales.find(d => d.month === month);
+    return found ? found.total : 0;
+  });
+
+  const profitData = sortedMonths.map(month => {
+    const salesFound = monthlySales.find(d => d.month === month);
+    const purchasesFound = monthlyPurchases.find(d => d.month === month);
+    return (salesFound ? salesFound.total : 0) - (purchasesFound ? purchasesFound.total : 0);
+  });
 
   return (
     <Card variant="outlined" sx={{ width: '100%' }}>
@@ -56,86 +86,54 @@ export default function SessionsChart() {
           Revenue vs Profits
         </Typography>
         <Stack sx={{ justifyContent: 'space-between' }}>
-          <Stack
-            direction="row"
-            sx={{
-              alignContent: { xs: 'center', sm: 'flex-start' },
-              alignItems: 'center',
-              gap: 1,
-            }}
-          >
-            <Typography variant="h4" component="p">
-              1.77M
-            </Typography>
-            <Chip size="small" color="success" label="+35%" />
-          </Stack>
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            Data per day for the last 30 days
+            Monthly comparison of Revenue and Profit
           </Typography>
         </Stack>
         <LineChart
-          colors={colorPalette}
+          colors={[theme.palette.primary.main, theme.palette.secondary.main]}
           xAxis={[
             {
               scaleType: 'point',
-              data,
-              tickInterval: (index, i) => (i + 1) % 5 === 0,
+              data: sortedMonths,
             },
           ]}
           series={[
             {
-              id: 'direct',
+              id: 'revenue',
               label: 'Revenue',
+              data: revenueData,
               showMark: false,
               curve: 'linear',
-              stack: 'total',
               area: true,
+              stack: 'total',
               stackOrder: 'ascending',
-              data: [
-                300, 900, 600, 1200, 1500, 1800, 2400, 2100, 2700, 3000, 1800, 3300,
-                3600, 3900, 4200, 4500, 3900, 4800, 5100, 5400, 4800, 5700, 6000,
-                6300, 6600, 6900, 7200, 7500, 7800, 8100,
-              ],
             },
             {
-              id: 'referral',
+              id: 'profit',
               label: 'Profits',
+              data: profitData,
               showMark: false,
               curve: 'linear',
-              stack: 'total',
               area: true,
+              stack: 'total',
               stackOrder: 'ascending',
-              data: [
-                500, 900, 700, 1400, 1100, 1700, 2300, 2000, 2600, 2900, 2300, 3200,
-                3500, 3800, 4100, 4400, 2900, 4700, 5000, 5300, 5600, 5900, 6200,
-                6500, 5600, 6800, 7100, 7400, 7700, 8000,
-              ],
             },
-            
           ]}
           height={250}
           margin={{ left: 50, right: 20, top: 20, bottom: 20 }}
           grid={{ horizontal: true }}
           sx={{
-            '& .MuiAreaElement-series-organic': {
-              fill: "url('#organic')",
+            '& .MuiAreaElement-series-revenue': {
+              fill: "url('#revenueGradient')",
             },
-            '& .MuiAreaElement-series-referral': {
-              fill: "url('#referral')",
-            },
-            '& .MuiAreaElement-series-direct': {
-              fill: "url('#direct')",
-            },
-          }}
-          slotProps={{
-            legend: {
-              hidden: true,
+            '& .MuiAreaElement-series-profit': {
+              fill: "url('#profitGradient')",
             },
           }}
         >
-          <AreaGradient color={theme.palette.primary.dark} id="organic" />
-          <AreaGradient color={theme.palette.primary.main} id="referral" />
-          <AreaGradient color={theme.palette.primary.light} id="direct" />
+          <AreaGradient color={theme.palette.primary.main} id="revenueGradient" />
+          <AreaGradient color={theme.palette.secondary.main} id="profitGradient" />
         </LineChart>
       </CardContent>
     </Card>

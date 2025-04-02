@@ -17,32 +17,132 @@ import CombinedChart from './CombinedChart';
 export default function MainGrid() {
   const [open, setOpen] = React.useState(false);
       const [clients, setClients] = React.useState([]);
+      const [products, setProducts] = React.useState([]);
+      const [sales, setSales] = React.useState([]);
+      const [lastMonthSales, setLastMonthSales] = React.useState(null);
       const [users, setUsers] = React.useState(null);
-      const [editClient, setEditClient] = React.useState(null);
-      const [sales, setSales] = React.useState(null);
+      const [productCount, setProductCount] = React.useState(null);
+      
+      function getPerDay(category) {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth()-1; // 0-based index
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        
+        // Initialize an array with 0s for each day of the current month
+        const categoryData = new Array(daysInMonth).fill(0);
+      
+        category.forEach(indx => {
+          if (indx.saleDate){
+            const salesDate = new Date(indx.saleDate);
 
-      // if (sales > 1000000)
+            const indxMonth = salesDate.getMonth();
+            const indxYear = salesDate.getFullYear();
+            const day = salesDate.getDate(); // 1-based index
+            
+            // Ensure the client belongs to the current month and year
+            if (indxMonth === month && indxYear === year) {
+              categoryData[day - 1] += indx.amount; // Subtract 1 since array index starts at 0
+              
+            }
+          }
+          else if (indx.createdAt) {
+            const createdAtDate = new Date(indx.createdAt);
+            
+            const indxMonth = createdAtDate.getMonth();
+            const indxYear = createdAtDate.getFullYear();
+            const day = createdAtDate.getDate(); // 1-based index
+            
+            // Ensure the client belongs to the current month and year
+            if (indxMonth === month && indxYear === year) {
+              categoryData[day - 1] += 1; // Subtract 1 since array index starts at 0
+              
+            }
+          }
+        });
+        
+        return categoryData;
+      }
+      
+      React.useEffect(() => {
+        const fetchClients = async () => {
+          try {
+            const res = await fetch(`${import.meta.env.VITE_PORT}/server/client/getall`);
+            const data = await res.json();
+      
+            if (res.ok) {
+              setClients(data.clients);
+              setUsers(data.lastMonthClients)
+            }
+          } catch (error) {
+            console.log(error);
+          }
+        };
+
+        const fetchProducts = async () => {
+          try {
+            const res = await fetch(`${import.meta.env.VITE_PORT}/server/product/getall`);
+            const data = await res.json();
+      
+            if (res.ok) {
+              setProducts(data.products);
+              setProductCount(data.lastMonthProducts);
+            }
+          } catch (error) {
+            console.log(error);
+          }
+        };
+
+        const fetchSales = async () => {
+          try {
+            const res = await fetch(`${import.meta.env.VITE_PORT}/server/sale/getall`);
+            const data = await res.json();
+            
+            if (res.ok) {
+              
+              setSales(data.sales);
+              setLastMonthSales(data.totalSalesLast32Days);
+            }
+          } catch (error) {
+            console.log(error);
+          }
+        };
+      
+        fetchClients();
+        fetchSales();
+        fetchProducts();
+      }, []);
+      
+      
+      
+      const clientsData = getPerDay(clients);
+      const productsData = getPerDay(products);
+      const salesData = getPerDay(sales);
+
+      console.log(salesData,productsData);
+      console.log(products);
+      
       const dataCard = [
         {
           title: 'Total Clients',
           value: users ?? 0, // Ensuring it's not null
           interval: 'Last 30 days',
           trend: 'up',
-          data: [1,1,2,2,3,3,3,4,4,4,5,5,5,6,6,6,10,10,11,14,15,15,16,16,19,19,19,20],
+          data: clientsData,
         },
         {
           title: 'Sales',
-          value: '253K',
+          value: (lastMonthSales / 1000), // Ensuring it's not null
           interval: 'Last 30 days',
           trend: 'down',
-          data: [1640, 1250, 970, 1130, 1050, 900, 720, 1080, 900, 750, 920, 820, 840, 600, 820, 780, 800, 760, 380, 740, 660, 820, 840, 700, 520, 480, 700, 660, 500, 520],
+          data: salesData
         },
         {
           title: 'Total Products',
-          value: 9,
+          value: productCount ?? 0, // Ensuring it's not null
           interval: 'Last 30 days',
           trend: 'neutral',
-          data: [500, 400, 510, 530, 520, 600, 530, 520, 510, 730, 520, 510, 530, 620, 510, 530, 520, 410, 530, 520, 610, 530, 520, 610, 530, 420, 510, 430, 520, 510],
+          data: productsData 
         },
       ];
       
@@ -57,28 +157,10 @@ export default function MainGrid() {
           setEditClient(null);
       };
   
-      React.useEffect(() => {
-          const fetchClients = async () => {
-              try {
-                  const res = await fetch(`${import.meta.env.VITE_PORT}/server/client/getall`);
-                  const data = await res.json();
-                  
-                  if (res.ok) {
-                      setClients(data.clients);
-                      setUsers(data.lastMonthClients);
-                  }
-  
-              } catch (error) {
-                  console.log(error);
-  
-              }
-          };
-          fetchClients();
-          
-
-      }, []);
-  
-
+      
+      // Example usage inside useEffect:
+      
+      
   
       const handleEditClick = (client) => {
           setEditClient(client);

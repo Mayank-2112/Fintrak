@@ -39,6 +39,11 @@ export const getProducts = async (req,res,next)=>{
         createdAt: { $gte: oneMonthAgo},
     });
 
+    const thirtyTwoDaysAgo = new Date();
+        
+        thirtyTwoDaysAgo.setDate(now.getDate() - 33);
+ 
+
     res.status(200).json({products,totalProducts,lastMonthProducts});
 
          

@@ -10,20 +10,19 @@ import Typography from '@mui/material/Typography';
 import { SparkLineChart } from '@mui/x-charts/SparkLineChart';
 import { areaElementClasses } from '@mui/x-charts/LineChart';
 
-function getDaysInMonth(month, year) {
-  const date = new Date(year, month, 0);
-  const monthName = date.toLocaleDateString('en-US', {
-    month: 'short',
-  });
-  const daysInMonth = date.getDate();
+function getLast30Days() {
   const days = [];
-  let i = 1;
-  while (days.length < daysInMonth) {
-    days.push(`${monthName} ${i}`);
-    i += 1;
+  const options = { month: 'short', day: 'numeric' };
+
+  for (let i = 31; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    days.push(date.toLocaleDateString('en-US', options));
   }
+
   return days;
 }
+
 
 function AreaGradient({ color, id }) {
   return (
@@ -43,8 +42,8 @@ AreaGradient.propTypes = {
 
 function StatCard({ title, value, interval, trend, data }) {
   const theme = useTheme();
-  const daysInWeek = getDaysInMonth(4, 2024);
-
+  const daysInWeek = getLast30Days();
+  
   const trendColors = {
     up:
       theme.palette.mode === 'light'
@@ -52,8 +51,8 @@ function StatCard({ title, value, interval, trend, data }) {
         : theme.palette.success.dark,
     down:
       theme.palette.mode === 'light'
-        ? theme.palette.error.main
-        : theme.palette.error.dark,
+        ? theme.palette.primary.main
+        : theme.palette.primary.dark,
     neutral:
       theme.palette.mode === 'light'
         ? theme.palette.grey[400]
@@ -68,7 +67,6 @@ function StatCard({ title, value, interval, trend, data }) {
 
   const color = labelColors[trend];
   const chartColor = trendColors[trend];
-  const trendValues = { up: '+25%', down: '-25%', neutral: '+5%' };
 
   return (
     <Card variant="outlined" sx={{ height: '100%', flexGrow: 1 }}>
@@ -86,9 +84,8 @@ function StatCard({ title, value, interval, trend, data }) {
               sx={{ justifyContent: 'space-between', alignItems: 'center' }}
             >
               <Typography variant="h4" component="p">
-                {value}
+                {title == 'Sales' ? value+'K' : value}
               </Typography>
-              <Chip size="small" color={color} label={trendValues[trend]} />
             </Stack>
             <Typography variant="caption" sx={{ color: 'text.secondary' }}>
               {interval}
@@ -129,3 +126,4 @@ StatCard.propTypes = {
 };
 
 export default StatCard;
+

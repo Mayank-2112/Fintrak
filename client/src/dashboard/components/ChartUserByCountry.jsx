@@ -10,38 +10,6 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
 
-
-
-const data = [
-  { label: 'India', value: 35000 },
-  { label: 'USA', value: 25000 },
-  { label: 'Brazil', value: 30000 },
-  { label: 'Other', value: 10000 },
-];
-
-const countries = [
-  {
-    name: 'Advertising',
-    value: 35,
-    color: 'hsl(220, 25%, 65%)',
-  },
-  {
-    name: 'Office Supplies',
-    value: 25,
-    color: 'hsl(220, 25%, 45%)',
-  },
-  {
-    name: 'Employee Welfare',
-    value: 30,
-    color: 'hsl(220, 25%, 30%)',
-  },
-  {
-    name: 'Utilities',
-    value: 10,
-    color: 'hsl(220, 25%, 20%)',
-  },
-];
-
 const StyledText = styled('text', {
   shouldForwardProp: (prop) => prop !== 'variant',
 })(({ theme }) => ({
@@ -49,51 +17,22 @@ const StyledText = styled('text', {
   dominantBaseline: 'central',
   fill: (theme.vars || theme).palette.text.secondary,
   variants: [
-    {
-      props: {
-        variant: 'primary',
-      },
-      style: {
-        fontSize: theme.typography.h5.fontSize,
-      },
-    },
-    {
-      props: ({ variant }) => variant !== 'primary',
-      style: {
-        fontSize: theme.typography.body2.fontSize,
-      },
-    },
-    {
-      props: {
-        variant: 'primary',
-      },
-      style: {
-        fontWeight: theme.typography.h5.fontWeight,
-      },
-    },
-    {
-      props: ({ variant }) => variant !== 'primary',
-      style: {
-        fontWeight: theme.typography.body2.fontWeight,
-      },
-    },
+    { props: { variant: 'primary' }, style: { fontSize: theme.typography.h5.fontSize, fontWeight: theme.typography.h5.fontWeight } },
+    { props: { variant: 'secondary' }, style: { fontSize: theme.typography.body2.fontSize, fontWeight: theme.typography.body2.fontWeight } },
   ],
 }));
 
 function PieCenterLabel({ primaryText, secondaryText }) {
   const { width, height, left, top } = useDrawingArea();
-  const primaryY = top + height / 2 - 10;
-  const secondaryY = primaryY + 24;
-
   return (
-    <React.Fragment>
-      <StyledText variant="primary" x={left + width / 2} y={primaryY}>
+    <>
+      <StyledText variant="primary" x={left + width / 2} y={top + height / 2 - 10}>
         {primaryText}
       </StyledText>
-      <StyledText variant="secondary" x={left + width / 2} y={secondaryY}>
+      <StyledText variant="secondary" x={left + width / 2} y={top + height / 2 + 14}>
         {secondaryText}
       </StyledText>
-    </React.Fragment>
+    </>
   );
 }
 
@@ -102,19 +41,44 @@ PieCenterLabel.propTypes = {
   secondaryText: PropTypes.string.isRequired,
 };
 
-const colors = [
-  'hsl(220, 20%, 65%)',
-  'hsl(220, 20%, 42%)',
-  'hsl(220, 20%, 35%)',
-  'hsl(220, 20%, 25%)',
-];
+const colors = ['hsl(220, 20%, 65%)', 'hsl(220, 20%, 42%)', 'hsl(220, 20%, 35%)', 'hsl(220, 20%, 25%)'];
 
 export default function ChartUserByCountry() {
+  const [categories, setCategories] = React.useState([]);
+  const [totalAmount, setTotalAmount] = React.useState(0);
+
+  React.useEffect(() => {
+    const fetchPurchases = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_PORT}/server/purchase/getall`);
+        const data = await res.json();
+        if (res.ok) {
+          const grouped = data.purchases.reduce((acc, purchase) => {
+            acc[purchase.category] = (acc[purchase.category] || 0) + purchase.amount;
+            return acc;
+          }, {});
+
+          const total = Object.values(grouped).reduce((sum, val) => sum + val, 0);
+          setTotalAmount(Math.round(total / 1000));
+
+          const formattedData = Object.entries(grouped).map(([category, value], index) => ({
+            name: category,
+            value: ((value / total) * 100).toFixed(2),
+            color: colors[index % colors.length],
+          }));
+
+          setCategories(formattedData);
+        }
+      } catch (error) {
+        console.error('Error fetching purchases:', error);
+      }
+    };
+
+    fetchPurchases();
+  }, []);
+
   return (
-    <Card
-      variant="outlined"
-      sx={{ display: 'flex', flexDirection: 'column', gap: '8px', flexGrow: 1 }}
-    >
+    <Card variant="outlined" sx={{ display: 'flex', flexDirection: 'column', gap: '8px', flexGrow: 1 }}>
       <CardContent>
         <Typography component="h2" variant="subtitle2">
           Expense Category
@@ -122,15 +86,10 @@ export default function ChartUserByCountry() {
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <PieChart
             colors={colors}
-            margin={{
-              left: 80,
-              right: 80,
-              top: 80,
-              bottom: 80,
-            }}
+            margin={{ left: 80, right: 80, top: 80, bottom: 80 }}
             series={[
               {
-                data,
+                data: categories.map(({ name, value }) => ({ label: name, value: parseFloat(value) })),
                 innerRadius: 65,
                 outerRadius: 100,
                 paddingAngle: 0,
@@ -139,45 +98,26 @@ export default function ChartUserByCountry() {
             ]}
             height={260}
             width={260}
-            slotProps={{
-              legend: { hidden: true },
-            }}
+            slotProps={{ legend: { hidden: true } }}
           >
-            <PieCenterLabel primaryText="54K" secondaryText="Total" />
+            <PieCenterLabel primaryText={`${totalAmount.toLocaleString()}K`} secondaryText="Total" />
           </PieChart>
         </Box>
-        {countries.map((country, index) => (
-          <Stack
-            key={index}
-            direction="row"
-            sx={{ alignItems: 'center', gap: 2, pb: 2 }}
-          >
-            {/* {country.flag} */}
+        {categories.map((category, index) => (
+          <Stack key={index} direction="row" sx={{ alignItems: 'center', gap: 2, pb: 2 }}>
             <Stack sx={{ gap: 1, flexGrow: 1 }}>
-              <Stack
-                direction="row"
-                sx={{
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  gap: 2,
-                }}
-              >
+              <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
                 <Typography variant="body2" sx={{ fontWeight: '500' }}>
-                  {country.name}
+                  {category.name}
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                  {country.value}%
+                  {category.value}%
                 </Typography>
               </Stack>
               <LinearProgress
                 variant="determinate"
-                aria-label="Number of users by country"
-                value={country.value}
-                sx={{
-                  [`& .${linearProgressClasses.bar}`]: {
-                    backgroundColor: country.color,
-                  },
-                }}
+                value={parseFloat(category.value)}
+                sx={{ [`& .${linearProgressClasses.bar}`]: { backgroundColor: category.color } }}
               />
             </Stack>
           </Stack>

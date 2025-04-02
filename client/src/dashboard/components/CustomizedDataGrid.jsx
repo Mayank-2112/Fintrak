@@ -32,7 +32,6 @@ export  const CustomizedDataGrid = ({ category, data, setData, handleEditClick }
     setOpenDialog(true);
   };
 
-  console.log(selectedRow);
   
   const handleDialogClose = () => {
     setOpenDialog(false);

@@ -25,9 +25,6 @@ export default function Header( {activeTab}) {
       <NavbarBreadcrumbs changeTab={activeTab}/>
       <Stack direction="row" sx={{ gap: 1 }}>
         <CustomDatePicker />
-        <MenuButton showBadge aria-label="Open notifications">
-          <NotificationsRoundedIcon />
-        </MenuButton>
         <ColorModeIconDropdown />
       </Stack>
     </Stack>

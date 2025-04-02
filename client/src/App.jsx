@@ -4,6 +4,7 @@ import Dashboard from "./dashboard/Dashboard"
 import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
 import PrivateRoute from "./components/PrivateRoute";
 import { useSelector } from "react-redux";
+import Voiceflow from "./components/VoiceFlow";
 function App() {
   const {currentUser} = useSelector((state) => state.user);
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard/>}/>
         </Route>
       </Routes>
+      <Voiceflow />
     </BrowserRouter>
     </>
   )

@@ -37,12 +37,32 @@ export const getSales = async (req, res, next) => {
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1); // 1st day of the month
         const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0); // Last day of the month
 
+        const thirtyTwoDaysAgo = new Date();
+        
+        thirtyTwoDaysAgo.setDate(now.getDate() - 33);
 
+        // Get total sales amount for the last 32 days
+        const last32DaysSalesAmount = await Sale.aggregate([
+            { 
+                $match: { 
+                    saleDate: { $gte: thirtyTwoDaysAgo, $lte: now } 
+                } 
+            },
+            { 
+                $group: { 
+                    _id: null, 
+                    totalAmount: { $sum: "$amount" } 
+                } 
+            }
+        ]);
+        
+        // Extract total amount or set to 0 if no data found
+        const totalSalesLast32Days = last32DaysSalesAmount.length > 0 ? last32DaysSalesAmount[0].totalAmount : 0;
         // Calculate total sales amount for the current month based on salesDate
         const currentMonthSalesAmount = await Sale.aggregate([
             { 
                 $match: { 
-                    salesDate: { $gte: startOfMonth, $lte: endOfMonth } 
+                    saleDate: { $gte: startOfMonth, $lte: endOfMonth } 
                 } 
             },
             { 
@@ -58,8 +78,9 @@ export const getSales = async (req, res, next) => {
 
         res.status(200).json({ 
             sales, 
-            totalSales, 
-            currentMonthTotalAmount 
+            totalSales,
+            currentMonthTotalAmount,
+            totalSalesLast32Days,
         });
 
     } catch (error) {
